@@ -2,7 +2,9 @@
 
 Deterministic, checksummed patching pipeline for Azure Logic Apps (Consumption tier). Created to take the pain out of repeated small changes to Logic Apps that are similar in code like altering a send to address across several communication apps or injecting an improved method for logging in X apps in a scriptable way so long as you know the attachment point step above or below in each individual app.
 
-Microsoft keeps so much of the syntax a sacred mystery..no offline validator? In the Year of our Lord `utcNow()`? Unbelievable. 
+Microsoft keeps so much of the syntax a sacred mystery...
+
+No offline validator? In the Year of our Lord `utcNow()`? Unbelievable. 
 
 So I themed the kit around the Age of Exploration and the Spanish Inquisition.
 
