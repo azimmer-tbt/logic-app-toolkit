@@ -1,0 +1,11 @@
+{
+    "prior_file": "FRESHMART-DEV-PRICES.json",
+    "desired_values": "desired_values_FRESHMART-DEV.v2.txt",
+    "mode": "dev",
+    "html_subdir": "FRESHMART-DEV",
+    "contractor_key": "",
+    "schema_file": "parse_schema_dev_stores.json",
+    "search_type": "stores",
+    "wrapper_key": "stores",
+    "device_array_key": "stores"
+}

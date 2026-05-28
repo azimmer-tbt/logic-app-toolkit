@@ -1,0 +1,188 @@
+{
+  "version": "2025-12-18",
+  "notes": "Safe-start catalog. Enabled rules are conservative and verified; new operations are pre-seeded as disabled skeletons at the end.",
+  "defaults": { "PrettyCategory": "Other" },
+  "type_aliases": {
+    "If": "Condition"
+  },
+  "types": {
+    "Wait":                   { "pretty_category": "Schedule",              "pretty_type": "Delay" },
+    "Condition":              { "pretty_category": "Control",               "pretty_type": "Condition" },
+    "Table":                  { "pretty_category": "Data Operations",       "pretty_type": "Create CSV table" },
+    "Query":                  { "pretty_category": "Data Operations",       "pretty_type": "Filter array" },
+    "Select":                 { "pretty_category": "Data Operations",       "pretty_type": "Filter array" },
+    "Foreach":                { "pretty_category": "Control",               "pretty_type": "For each" },
+    "Scope":                  { "pretty_category": "Control",               "pretty_type": "Scope" },
+    "Switch":                 { "pretty_category": "Control",               "pretty_type": "Switch" },
+    "Terminate":              { "pretty_category": "Control",               "pretty_type": "Terminate" },
+    "Until":                  { "pretty_category": "Control",               "pretty_type": "Until" },
+    "InitializeVariable":     { "pretty_category": "Variables",             "pretty_type": "Initialize variables" },
+    "SetVariable":            { "pretty_category": "Variables",             "pretty_type": "Set variable" },
+    "AppendToArrayVariable":  { "pretty_category": "Variables",             "pretty_type": "Append to array variable" },
+    "AppendToStringVariable": { "pretty_category": "Variables",             "pretty_type": "Append to string variable" },
+    "IncrementVariable":      { "pretty_category": "Variables",             "pretty_type": "Increment variable" },
+    "DecrementVariable":      { "pretty_category": "Variables",             "pretty_type": "Decrement variable" },
+    "Compose":                { "pretty_category": "Data Operations",       "pretty_type": "Compose" },
+    "ParseJson":              { "pretty_category": "Data Operations",       "pretty_type": "Parse JSON" },
+    "Http":                   { "pretty_category": "HTTP",                  "pretty_type": "HTTP" },
+    "HttpWebhook":            { "pretty_category": "HTTP",                  "pretty_type": "HTTP Webhook" },
+    "Response":               { "pretty_category": "Request",               "pretty_type": "Response" },
+    "Delay":                  { "pretty_category": "Schedule",              "pretty_type": "Delay" },
+    "DelayUntil":             { "pretty_category": "Schedule",              "pretty_type": "Delay until" },
+    "AddToTime":              { "pretty_category": "Date Time",             "pretty_type": "Add to time" },
+    "ConvertTimeZone":        { "pretty_category": "Date Time",             "pretty_type": "Convert time zone" },
+    "CurrentTime":            { "pretty_category": "Date Time",             "pretty_type": "Current time" },
+    "GetFutureTime":          { "pretty_category": "Date Time",             "pretty_type": "Get future time" },
+    "GetPastTime":            { "pretty_category": "Date Time",             "pretty_type": "Get past time" },
+    "SubtractFromTime":       { "pretty_category": "Date Time",             "pretty_type": "Subtract from time" }
+  },
+    "meta_types": {
+    "ApiConnection": {
+      "pretty_category": "UNKNOWN",
+      "pretty_type": "UNKNOWN",
+      "requires_subtypes": true,
+      "description": "Generic connector (SharePoint, Outlook, Key Vault, etc.). Must be refined to a concrete subtype via hints."
+    }
+  },
+  "subtypes": {
+    "ApiConnection.SharePoint_Read":   { "pretty_category": "SharePoint",          "pretty_type": "Get file content" },
+    "ApiConnection.SharePoint_Write":  { "pretty_category": "SharePoint",          "pretty_type": "Create file" },
+    "ApiConnection.KeyVault_GetSecret":         { "pretty_category": "Azure Key Vault",     "pretty_type": "Get secret" },
+    "ApiConnection.Email_V2_SendShared":            { "pretty_category": "Office 365 Outlook",  "pretty_type": "Send an email from a shared mailbox (V2)" },
+    "ApiConnection.Teams_PostCard":    { "pretty_category": "Microsoft Teams",     "pretty_type": "Post card in a chat or channel" }
+  },
+  "hints": [
+    {
+      "type": "ApiConnection",
+      "subtype": "ApiConnection.Email_V2_SendShared",
+      "enabled": true,
+      "ways_to_match": [
+        {
+          "name": "office365_base",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains", "value": "['office365']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "post" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/v2/SharedMailbox/Mail" }
+          ]
+        },
+        {
+          "name": "office365_conn_1",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['office365-1']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "post" },
+            { "field": "inputs.path",                   "op": "contains", "value": "/v2/SharedMailbox/Mail" }
+          ]
+        },
+              {
+          "name": "office365_conn_2",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.body.MailboxAddress",   "op": "exists",   "value": "true" },
+            { "field": "inputs.path",                  "op": "contains", "value": "/v2/SharedMailbox/Mail" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ApiConnection",
+      "subtype": "ApiConnection.Teams_PostCard",
+      "enabled": true,
+      "ways_to_match": [
+        {
+          "name": "teams_post_chat_or_channel",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "equals",   "value": "teams" },
+            { "field": "inputs.path",                  "op": "contains", "value": "/chats/" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ApiConnection",
+      "subtype": "ApiConnection.SharePoint_Read",
+      "enabled": true,
+      "ways_to_match": [
+        {
+          "name": "sharepoint_get_file_content",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['sharepointonline']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "get" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/files" }
+          ]
+        },
+        {
+          "name": "sharepoint_get_file_content",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['sharepointonline-1']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "get" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/files" }
+          ]
+        },
+        {
+          "name": "sharepoint_get_file_content",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.method",               "op": "equals",   "value": "get" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/files" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ApiConnection",
+      "subtype": "ApiConnection.SharePoint_Write",
+      "enabled": true,
+      "ways_to_match": [
+        {
+          "name": "sharepoint_create_file_by_folder_and_name",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['sharepointonline']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "post" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/files" }
+          ]
+        },
+        {
+          "name": "sharepoint_create_file_by_folder_and_name__altconn",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['sharepointonline-1']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "post" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/files" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ApiConnection",
+      "subtype": "ApiConnection.KeyVault_GetSecret",
+      "future_use": false,
+      "enabled": true,
+      "ways_to_match": [
+        {
+          "name": "keyvault_get_secret_value",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['keyvault']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "get" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/secrets/" }
+          ]
+        },
+        {
+          "name": "keyvault_get_secret_value",
+          "needs_all": true,
+          "conditions": [
+            { "field": "inputs.host.connection.name", "op": "contains",   "value": "['keyvault-1']" },
+            { "field": "inputs.method",               "op": "equals",   "value": "get" },
+            { "field": "inputs.path",                 "op": "contains", "value": "/secrets/" }
+          ]
+        }
+      ]
+    }
+  ]
+}

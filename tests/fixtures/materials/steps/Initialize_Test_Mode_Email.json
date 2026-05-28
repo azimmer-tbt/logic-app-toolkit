@@ -1,0 +1,1 @@
+{"Initialize_Test_Mode_Email": {"runAfter": {"Initialize_Test_Mode_Switch": ["Succeeded"]}, "type": "InitializeVariable", "inputs": {"variables": [{"name": "test_mode_email", "type": "string", "value": "test@freshmart.example.com"}]}}}
