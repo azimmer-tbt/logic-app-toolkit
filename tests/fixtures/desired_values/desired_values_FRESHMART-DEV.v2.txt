@@ -1,0 +1,62 @@
+Desired Values: FRESHMART-DEV
+============================================================
+
+Mode: dev
+Trigger: Mondays at 8:00 AM EST
+
+
+DATES (`Initialize_Effective_Date`, `Initialize_Price_Update_Date`, `Initialize_Expiry_Date`)
+------------------------------------------------------------
+Effective date          | when new prices start   | `effective_date`      | `February 1, 2026`
+Price update deadline   | shelf labels must change | `price_update_date`   | `January 28, 2026`
+Expiry date             | old prices invalid after | `expiry_date`         | `February 28, 2026`
+
+
+LOGGING (`Initialize_Logging_Variables`)
+------------------------------------------------------------
+Log file prefix     | rarely changes | `logfile_prefix`      | `dev_FreshMart_Prices`
+App short name      | rarely changes | `app_shortname`       | `dev_FreshMart_Prices`
+App long name       | rarely changes | `app_longname`        | `Dev - FreshMart Weekly Price Update Emailer`
+Logging folder path | rarely changes | `logging_prefix_path` | `/Shared Documents/Logging/FreshMart/dev_FreshMart_Prices`
+Who gets notified   | ops team       | `notification_emails` | `ops@freshmart.example.com, pricing@freshmart.example.com`
+
+
+API (`Initialize_API_Variables`)
+------------------------------------------------------------
+SharePoint site     | don't change | `sharepoint_site` | `https://freshmart.sharepoint.com/sites/ops`
+Price list URL      | don't change | `price_list_url`  | `@{variables('sharepoint_site')}/Shared Documents/price_list.csv`
+
+
+EMAIL ROUTING (`Initialize_Email_Variables`)
+------------------------------------------------------------
+Sender address      | must be valid | `default_from`  | `prices@freshmart.example.com`
+Fallback sender     | must be valid | `fallback_from` | `noreply@freshmart.example.com`
+
+
+EMAIL CONTENT (`Send_Per-Region_Emails`)
+------------------------------------------------------------
+English email    | edit .html file | `en` | `file:html_assets/FRESHMART-DEV/en/message.html`
+Spanish email    | edit .html file | `es` | `file:html_assets/FRESHMART-DEV/es/message.html`
+French email     | edit .html file | `fr` | `file:html_assets/FRESHMART-DEV/fr/message.html`
+Portuguese email | edit .html file | `pt` | `file:html_assets/FRESHMART-DEV/pt/message.html`
+
+
+CSS (`Initialize_Email_Variables`)
+------------------------------------------------------------
+Shared CSS style | wrapper format | `shared_css_style` | `file:components/shared_css_variable.json`
+
+
+PARSE SCHEMA (`Parse_Store_List`)
+------------------------------------------------------------
+Schema definition | store list schema | `schema` | `file:components/parse_schema_dev_stores.json`
+
+
+STRUCTURAL (do not edit — generator handles automatically)
+------------------------------------------------------------
+Test mode switch    | added if missing | `Initialize_Test_Mode_Switch`  | `file:steps/Initialize_Test_Mode_Switch.json`
+Test mode email     | added if missing | `Initialize_Test_Mode_Email`   | `file:steps/Initialize_Test_Mode_Email.json`
+Country code init   | added if missing | `store_country_code`           | `NULL`
+Country code clear  | added if missing | `Clear_Store_Country_Code`     | `file:steps/Clear_Store_Country_Code.json`
+Country code set    | added if missing | `Set_Store_Country_Code`       | `file:steps/Set_Store_Country_Code.json`
+Overrides scope     | added if missing | `Overrides_Scope`              | `file:steps/Overrides_Scope.json`
+Switch expression   | fixes India override | `Send_Per-Region_Emails`   | `@variables('store_language')`

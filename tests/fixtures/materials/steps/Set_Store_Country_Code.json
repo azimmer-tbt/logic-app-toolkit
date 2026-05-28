@@ -1,0 +1,1 @@
+{"Set_Store_Country_Code": {"runAfter": {"Set_Store_Name": ["Succeeded"]}, "type": "SetVariable", "inputs": {"name": "store_country_code", "value": "@toLower(trim(coalesce(item()?['Country'], '')))"}}}

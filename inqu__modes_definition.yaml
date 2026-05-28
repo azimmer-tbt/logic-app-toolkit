@@ -1,0 +1,57 @@
+# modes_definition.yaml — Inquisitor mode registry
+# Each entry defines how inquisitor parses one input format.
+# Adding a mode: write a parser, add an entry here.
+# Removing a mode is a breaking change (see CONTRACT §7).
+# ═══════════════════════════════════════════════════════════
+
+modes:
+
+  # ─────────────────────────────────────────────────────────
+  vitals:
+  # ─────────────────────────────────────────────────────────
+    arg_name: vitals                # CLI: --vitals PATH
+    parser: vitals_parser           # function name in inquisitor.py
+    requires_app: true              # needs --app to select section
+    implemented: true
+
+    # Preprocessing applied to raw file text before yaml.safe_load()
+    preprocess:
+      - fix_yaml_brackets           # quotes [N] and [LANG] in flow mappings
+
+    # Sentinel values and how to handle them
+    sentinel_values:
+      NEW_VAR: existence_only       # verify field exists + value matches; skip checksum
+      SEE_MANIFEST: resolve_manifest # load checksum from MANIFEST.json
+
+    # vitals.yaml structure for reference:
+    #   apps:
+    #     APP_NAME:
+    #       variables:
+    #         var_name: { value, checksum, json_path }
+    #       html_files:
+    #         compose_body:
+    #           lang: { file, checksum }
+    #         subject: ...
+    #         button: ...
+    #         additional_info_links: ...
+    notes: >
+      Expects vitals.yaml with apps.{APP}.variables and apps.{APP}.html_files.
+      Checksums are SHA-256 with chop auto-detected (typically 10).
+      json_path values are human hints — lookup is by variable/action name.
+
+  # ─────────────────────────────────────────────────────────
+  patch_task:
+  # ─────────────────────────────────────────────────────────
+    arg_name: patch_task            # CLI: --patch_task PATH
+    parser: patch_task_parser       # function name (not yet written)
+    requires_app: false             # patch_task is single-app
+    implemented: false              # reserved for future
+
+    preprocess: []
+
+    sentinel_values: {}
+
+    notes: >
+      Reserved for future implementation. Will validate that fixes declared
+      in a patch_task.yaml were correctly applied to the Logic App JSON.
+      Checksum convention: SHA-256[:16] (la_lib convention).

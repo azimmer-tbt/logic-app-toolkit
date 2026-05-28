@@ -1,0 +1,370 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Schedule": {
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Week",
+                    "timeZone": "Eastern Standard Time",
+                    "startTime": "2026-01-06T08:00:00",
+                    "schedule": {
+                        "weekDays": ["Monday"],
+                        "hours": [8],
+                        "minutes": [0]
+                    }
+                },
+                "type": "Recurrence"
+            }
+        },
+        "actions": {
+            "Initialize_Effective_Date": {
+                "runAfter": {},
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "effective_date",
+                            "type": "string",
+                            "value": "January 15, 2026"
+                        }
+                    ]
+                }
+            },
+            "Initialize_Price_Update_Date": {
+                "runAfter": {
+                    "Initialize_Effective_Date": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "price_update_date",
+                            "type": "string",
+                            "value": "January 10, 2026"
+                        }
+                    ]
+                }
+            },
+            "Initialize_Expiry_Date": {
+                "runAfter": {
+                    "Initialize_Price_Update_Date": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "expiry_date",
+                            "type": "string",
+                            "value": "January 31, 2026"
+                        }
+                    ]
+                }
+            },
+            "Initialize_Logging_Variables": {
+                "runAfter": {
+                    "Initialize_Expiry_Date": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "logfile_prefix",
+                            "type": "string",
+                            "value": "dev_FreshMart_Prices"
+                        },
+                        {
+                            "name": "app_shortname",
+                            "type": "string",
+                            "value": "FreshMart_Prices"
+                        },
+                        {
+                            "name": "app_longname",
+                            "type": "string",
+                            "value": "FreshMart Weekly Price Update Emailer"
+                        },
+                        {
+                            "name": "logging_prefix_path",
+                            "type": "string",
+                            "value": "/Shared Documents/Logging/FreshMart/dev_FreshMart_Prices"
+                        },
+                        {
+                            "name": "notification_emails",
+                            "type": "string",
+                            "value": "ops@freshmart.example.com"
+                        }
+                    ]
+                }
+            },
+            "Initialize_Email_Variables": {
+                "runAfter": {
+                    "Initialize_Logging_Variables": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "default_from",
+                            "type": "string",
+                            "value": "prices@freshmart.example.com"
+                        },
+                        {
+                            "name": "fallback_from",
+                            "type": "string",
+                            "value": "noreply@freshmart.example.com"
+                        },
+                        {
+                            "name": "shared_css_style",
+                            "type": "string",
+                            "value": "<style>body{font-family:Arial;}.price{color:green;}</style>"
+                        }
+                    ]
+                }
+            },
+            "Initialize_API_Variables": {
+                "runAfter": {
+                    "Initialize_Email_Variables": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "sharepoint_site",
+                            "type": "string",
+                            "value": "https://freshmart.sharepoint.com/sites/ops"
+                        },
+                        {
+                            "name": "price_list_url",
+                            "type": "string",
+                            "value": "@{variables('sharepoint_site')}/Shared Documents/price_list.csv"
+                        }
+                    ]
+                }
+            },
+            "Initialize_Store_Variables": {
+                "runAfter": {
+                    "Initialize_API_Variables": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "store_name",
+                            "type": "string",
+                            "value": ""
+                        },
+                        {
+                            "name": "store_manager_email",
+                            "type": "string",
+                            "value": ""
+                        },
+                        {
+                            "name": "store_language",
+                            "type": "string",
+                            "value": ""
+                        }
+                    ]
+                }
+            },
+            "Initialize_Store_Counter": {
+                "runAfter": {
+                    "Initialize_Store_Variables": ["Succeeded"]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "store_counter",
+                            "type": "integer",
+                            "value": 0
+                        }
+                    ]
+                }
+            },
+            "Core_-_Main_Workflow": {
+                "runAfter": {
+                    "Initialize_Store_Counter": ["Succeeded"]
+                },
+                "type": "Scope",
+                "actions": {
+                    "Get_List_of_Stores": {
+                        "runAfter": {},
+                        "type": "Scope",
+                        "actions": {
+                            "Get_SharePoint_CSV": {
+                                "runAfter": {},
+                                "type": "Http",
+                                "inputs": {
+                                    "method": "GET",
+                                    "uri": "@{variables('price_list_url')}"
+                                }
+                            },
+                            "Parse_Store_List": {
+                                "runAfter": {
+                                    "Get_SharePoint_CSV": ["Succeeded"]
+                                },
+                                "type": "ParseJson",
+                                "inputs": {
+                                    "content": "@body('Get_SharePoint_CSV')",
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "stores": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "Store_Name": {"type": "string"},
+                                                        "Manager_Email": {"type": "string"},
+                                                        "Store_Language": {"type": "string"},
+                                                        "Country": {"type": "string"},
+                                                        "id": {"type": "integer"}
+                                                    },
+                                                    "required": ["Store_Name", "Manager_Email", "id"]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Handle_Stores_From_List": {
+                        "runAfter": {
+                            "Get_List_of_Stores": ["Succeeded"]
+                        },
+                        "type": "Foreach",
+                        "foreach": "@body('Parse_Store_List')?['stores']",
+                        "actions": {
+                            "Clear_Prior_Values": {
+                                "runAfter": {},
+                                "type": "Scope",
+                                "actions": {
+                                    "Clear_Store_Name": {
+                                        "runAfter": {},
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                            "name": "store_name",
+                                            "value": ""
+                                        }
+                                    }
+                                }
+                            },
+                            "Analyze_Store_Info": {
+                                "runAfter": {
+                                    "Clear_Prior_Values": ["Succeeded"]
+                                },
+                                "type": "Scope",
+                                "actions": {
+                                    "Set_Store_Name": {
+                                        "runAfter": {},
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                            "name": "store_name",
+                                            "value": "@item()?['Store_Name']"
+                                        }
+                                    }
+                                }
+                            },
+                            "Send_Per-Region_Emails": {
+                                "runAfter": {
+                                    "Analyze_Store_Info": ["Succeeded"]
+                                },
+                                "type": "Switch",
+                                "expression": "@item()?['Store_Language']",
+                                "default": {
+                                    "actions": {
+                                        "Compose_English_Email": {
+                                            "runAfter": {},
+                                            "type": "Compose",
+                                            "inputs": "<html><body><p>Dear Manager, prices effective January 15.</p></body></html>"
+                                        }
+                                    }
+                                },
+                                "cases": {
+                                    "Spanish": {
+                                        "case": "es",
+                                        "actions": {
+                                            "Compose_Spanish_Email": {
+                                                "runAfter": {},
+                                                "type": "Compose",
+                                                "inputs": "<html><body><p>Estimado Gerente, precios vigentes 15 de enero.</p></body></html>"
+                                            }
+                                        }
+                                    },
+                                    "French": {
+                                        "case": "fr",
+                                        "actions": {
+                                            "Compose_French_Email": {
+                                                "runAfter": {},
+                                                "type": "Compose",
+                                                "inputs": "<html><body><p>Cher Directeur, prix en vigueur le 15 janvier.</p></body></html>"
+                                            }
+                                        }
+                                    },
+                                    "Portuguese": {
+                                        "case": "pt",
+                                        "actions": {
+                                            "Compose_Portuguese_Email": {
+                                                "runAfter": {},
+                                                "type": "Compose",
+                                                "inputs": "<html><body><p>Prezado Gerente, preços vigentes em 15 de janeiro.</p></body></html>"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "Send_Email_Via_O365": {
+                                "runAfter": {
+                                    "Send_Per-Region_Emails": ["Succeeded"]
+                                },
+                                "type": "ApiConnection",
+                                "inputs": {
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['office365']['connectionId']"
+                                        }
+                                    },
+                                    "method": "post",
+                                    "path": "/v2/Mail",
+                                    "body": {
+                                        "To": "@variables('store_manager_email')",
+                                        "Subject": "FreshMart Price Update",
+                                        "Body": "@{outputs('Compose_English_Email')}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Core_-_Logging": {
+                "runAfter": {
+                    "Core_-_Main_Workflow": ["Succeeded", "Failed"]
+                },
+                "type": "Scope",
+                "actions": {
+                    "Log_Result": {
+                        "runAfter": {},
+                        "type": "Http",
+                        "inputs": {
+                            "method": "POST",
+                            "uri": "https://freshmart.sharepoint.com/_api/web/lists",
+                            "body": {
+                                "logfile_prefix": "@variables('logfile_prefix')",
+                                "status": "complete"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "defaultValue": {},
+            "type": "Object"
+        }
+    }
+}

@@ -1,0 +1,1 @@
+{"Initialize_Test_Mode_Switch": {"runAfter": {"Initialize_Expiry_Date": ["Succeeded"]}, "type": "InitializeVariable", "inputs": {"variables": [{"name": "test_mode", "type": "boolean", "value": true}]}}}
