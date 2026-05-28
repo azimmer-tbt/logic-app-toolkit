@@ -1,6 +1,10 @@
 # Logic App Toolkit
 
-Deterministic, checksummed patching pipeline for Azure Logic Apps (Consumption tier).
+Deterministic, checksummed patching pipeline for Azure Logic Apps (Consumption tier). Created to take the pain out of repeated small changes to Logic Apps that are similar in code like altering a send to address across several communication apps or injecting an improved scope for logging in N apps in a scriptable way.
+
+Because Microsoft keeps so much of the syntax a sacred mystery, I themed the kit around the Age of Exploration and the Spanish Inquisition.
+
+May your Logic Apps always be whole. Amen.
 
 ## The Toolkit
 
